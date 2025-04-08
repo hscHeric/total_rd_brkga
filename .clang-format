@@ -35,23 +35,23 @@ BinPackParameters : false
 BitFieldColonSpacing : Both
 BracedInitializerIndentWidth : 2
 BraceWrapping :
-    AfterCaseLabel : true
-    AfterClass : true
-    AfterControlStatement : Always
-    AfterEnum : true
-    AfterFunction : true
-    AfterNamespace : true
-    AfterStruct : true
-    AfterUnion : true
-    AfterExternBlock : true
-    BeforeCatch : true
-    BeforeElse : true
-    BeforeLambdaBody : true
+    AfterCaseLabel : false
+    AfterClass : false
+    AfterControlStatement : Never
+    AfterEnum : false
+    AfterFunction : false
+    AfterNamespace : false
+    AfterStruct : false
+    AfterUnion : false
+    AfterExternBlock : false
+    BeforeCatch : false
+    BeforeElse : false
+    BeforeLambdaBody : false
     BeforeWhile : false
     IndentBraces : false
-    SplitEmptyFunction : true
-    SplitEmptyRecord : true
-    SplitEmptyNamespace : true
+    SplitEmptyFunction : false
+    SplitEmptyRecord : false
+    SplitEmptyNamespace : false
 BreakAdjacentStringLiterals : false
 BreakAfterAttributes: Leave
 BreakBeforeBinaryOperators : None
