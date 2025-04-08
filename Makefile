@@ -21,7 +21,7 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 BRKGA_OBJS = $(OBJ_DIR)/Population.o
 
 # Programa final
-TARGET = $(BIN_DIR)/program
+TARGET = $(BIN_DIR)/cl_total_rdbrkga
 
 # Flags de inclusão
 INCLUDES = -I$(SRC_DIR) -I$(BRKGA_DIR)
