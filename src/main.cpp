@@ -1,8 +1,12 @@
+#include "../lib/brkgaAPI/BRKGA.h"
+#include "../lib/brkgaAPI/MTRand.h"
+#include "Decoder.hpp"
 #include "ListGraph.hpp"
 #include "MatrixGraph.hpp"
 
 #include <fstream>
 #include <iostream>
+#include <random>
 #include <set>
 
 #define DEBUG
@@ -16,19 +20,33 @@
 #endif
 
 struct AlgorithmParams {
-  unsigned    n    = 100;   // Size of chromosomes
-  unsigned    p    = 1000;  // Size of population
-  double      pe   = 0.20;  // Fraction of population to be the elite-set
-  double      pm   = 0.10;  // Fraction of population to be replaced by mutants
-  double      rhoe = 0.70;  // Probability offspring inherits elite parent allele
-  unsigned    K    = 3;     // Number of independent populations
-  unsigned    MAXT = 2;     // Number of threads for parallel decoding
-  std::string file_path;    // File path for the input file
-  std::string output_file = "results.csv";
+  unsigned      n           = 100;   // Size of chromosomes
+  unsigned      p           = 1000;  // Size of population
+  double        pe          = 0.20;  // Fraction of population to be the elite-set
+  double        pm          = 0.10;  // Fraction of population to be replaced by mutants
+  double        rhoe        = 0.70;  // Probability offspring inherits elite parent allele
+  unsigned      K           = 3;     // Number of independent populations
+  unsigned      MAXT        = 2;     // Number of threads for parallel decoding
+  unsigned      x_intvl     = 100;   // Exchange best individuals every x_intvl generations
+  unsigned      x_number    = 2;     // Number of best individuals to exchange
+  unsigned      max_gens    = 1000;  // Maximum number of generations
+  unsigned      stag_limit  = 100;   // Stagnation limit (number of generations without improvement)
+  long unsigned rng_seed    = 0;     // Random number generator seed (0 means generate random seed)
+  bool          random_seed = true;  // Flag to indicate if we should use a random seed
+  std::string   file_path;           // File path for the input file
+  std::string   output_file = "results.csv";
 };
 
 AlgorithmParams parse_args( int argc, char * argv[] );
 void            load_and_normalize_graph( const std::string & filename, bool & graph_is_matrix, ListGraph & graph_l, MatrixGraph & graph_m );
+long unsigned   generate_random_seed();
+
+long unsigned generate_random_seed() {
+  std::random_device                           rd;
+  std::mt19937_64                              gen( rd() );
+  std::uniform_int_distribution<long unsigned> dis;
+  return dis( gen );
+}
 
 int main( int argc, char * argv[] ) {
   auto params = parse_args( argc, argv );
@@ -38,6 +56,98 @@ int main( int argc, char * argv[] ) {
 
   bool graph_is_matrix = false;
   load_and_normalize_graph( params.file_path, graph_is_matrix, graph_l, graph_m );
+
+  // Determinar a semente RNG a ser usada
+  long unsigned seed_to_use = params.random_seed ? generate_random_seed() : params.rng_seed;
+  DEBUG_PRINT( "Usando semente RNG: " << seed_to_use );
+
+  MTRand rng( seed_to_use );
+
+  if ( graph_is_matrix ) {
+    TRDDecoder<MatrixGraph> decoder( graph_m );
+
+    DEBUG_PRINT( "Executando BRKGA com MatrixGraph" );
+    BRKGA<TRDDecoder<MatrixGraph>, MTRand> algorithm( params.n, params.p, params.pe, params.pm, params.rhoe, decoder, rng, params.K, params.MAXT );
+
+    unsigned generation       = 1;
+    unsigned stagnation_count = 0;
+    double   best_fitness     = std::numeric_limits<double>::infinity();
+
+    do {
+      algorithm.evolve();
+
+      double current_best = algorithm.getBestFitness();
+      if ( current_best < best_fitness ) {
+        best_fitness     = current_best;
+        stagnation_count = 0;
+        DEBUG_PRINT( "Nova melhor solução encontrada: " << best_fitness );
+      } else {
+        stagnation_count++;
+        if ( stagnation_count >= params.stag_limit ) {
+          DEBUG_PRINT( "Critério de estagnação atingido após " << stagnation_count << " gerações sem melhoria" );
+          break;
+        }
+      }
+
+      if ( ( ++generation ) % params.x_intvl == 0 ) {
+        algorithm.exchangeElite( params.x_number );
+        DEBUG_PRINT( "Troca de elites realizada na geração " << generation );
+      }
+    } while ( generation < params.max_gens );
+
+    DEBUG_PRINT( "Melhor solução encontrada tem valor objetivo = " << algorithm.getBestFitness() );
+    DEBUG_PRINT( "Número total de gerações executadas: " << generation );
+    DEBUG_PRINT( "Semente RNG utilizada: " << seed_to_use );
+
+    if ( stagnation_count >= params.stag_limit ) {
+      DEBUG_PRINT( "Algoritmo parou por estagnação após " << params.stag_limit << " gerações sem melhoria" );
+    } else {
+      DEBUG_PRINT( "Algoritmo parou por atingir o limite máximo de gerações (" << params.max_gens << ")" );
+    }
+
+    DEBUG_PRINT( "Usando decoder com MatrixGraph" );
+  } else {
+    DEBUG_PRINT( "Executando BRKGA com ListGraph" );
+    TRDDecoder<ListGraph> decoder( graph_l );
+
+    BRKGA<TRDDecoder<ListGraph>, MTRand> algorithm( params.n, params.p, params.pe, params.pm, params.rhoe, decoder, rng, params.K, params.MAXT );
+
+    unsigned generation       = 1;
+    unsigned stagnation_count = 0;
+    double   best_fitness     = std::numeric_limits<double>::infinity();
+
+    do {
+      algorithm.evolve();
+
+      double current_best = algorithm.getBestFitness();
+      if ( current_best < best_fitness ) {
+        best_fitness     = current_best;
+        stagnation_count = 0;
+        DEBUG_PRINT( "Nova melhor solução encontrada: " << best_fitness );
+      } else {
+        stagnation_count++;
+        if ( stagnation_count >= params.stag_limit ) {
+          DEBUG_PRINT( "Critério de estagnação atingido após " << stagnation_count << " gerações sem melhoria" );
+          break;
+        }
+      }
+
+      if ( ( ++generation ) % params.x_intvl == 0 ) {
+        algorithm.exchangeElite( params.x_number );
+        DEBUG_PRINT( "Troca de elites realizada na geração " << generation );
+      }
+    } while ( generation < params.max_gens );
+
+    DEBUG_PRINT( "Melhor solução encontrada tem valor objetivo = " << algorithm.getBestFitness() );
+    DEBUG_PRINT( "Número total de gerações executadas: " << generation );
+    DEBUG_PRINT( "Semente RNG utilizada: " << seed_to_use );
+
+    if ( stagnation_count >= params.stag_limit ) {
+      DEBUG_PRINT( "Algoritmo parou por estagnação após " << params.stag_limit << " gerações sem melhoria" );
+    } else {
+      DEBUG_PRINT( "Algoritmo parou por atingir o limite máximo de gerações (" << params.max_gens << ")" );
+    }
+  }
 
   return 0;
 }
@@ -54,7 +164,12 @@ AlgorithmParams parse_args( int argc, char * argv[] ) {
               << "  --mutants FRACTION\n"
               << "  --inherit-elite-probability VALUE\n"
               << "  --populations NUMBER\n"
-              << "  --threads NUMBER\n"
+              << "  --parallel NUMBER\n"
+              << "  --exchange-interval GENERATIONS\n"
+              << "  --exchange-number COUNT\n"
+              << "  --max-generations NUMBER\n"
+              << "  --stagnation-limit GENERATIONS\n"
+              << "  --rng-seed VALUE  (0 ou omitido para semente aleatória)\n"
               << "  --output FILE\n";
     exit( 1 );
   }
@@ -76,8 +191,19 @@ AlgorithmParams parse_args( int argc, char * argv[] ) {
       params.rhoe = std::stod( argv[++i] );
     } else if ( arg == "--populations" && i + 1 < argc ) {
       params.K = std::stoul( argv[++i] );
-    } else if ( arg == "--threads" && i + 1 < argc ) {
+    } else if ( arg == "--parallel" && i + 1 < argc ) {
       params.MAXT = std::stoul( argv[++i] );
+    } else if ( arg == "--exchange-interval" && i + 1 < argc ) {
+      params.x_intvl = std::stoul( argv[++i] );
+    } else if ( arg == "--exchange-number" && i + 1 < argc ) {
+      params.x_number = std::stoul( argv[++i] );
+    } else if ( arg == "--max-generations" && i + 1 < argc ) {
+      params.max_gens = std::stoul( argv[++i] );
+    } else if ( arg == "--stagnation-limit" && i + 1 < argc ) {
+      params.stag_limit = std::stoul( argv[++i] );
+    } else if ( arg == "--rng-seed" && i + 1 < argc ) {
+      params.rng_seed    = std::stoul( argv[++i] );
+      params.random_seed = ( params.rng_seed == 0 );  // Se for 0, ainda gera aleatório
     } else if ( arg == "--output" && i + 1 < argc ) {
       params.output_file = argv[++i];
     }
@@ -113,7 +239,6 @@ void load_and_normalize_graph( const std::string & filename, bool & graph_is_mat
     throw std::runtime_error( "Nenhum vértice encontrado na entrada" );
   }
 
-  // Identificar lacunas nos IDs de vértices
   std::vector<int> missing_vertices;
   if ( !vertices.empty() ) {
     int min_vertex = *vertices.begin();
