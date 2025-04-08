@@ -1,5 +1,6 @@
 CXX = g++
-CXXFLAGS = -std=c++14 -Wall -Wextra -O2
+CXXFLAGS_PROGRAM = -std=c++17 -Wall -Wextra -O2
+CXXFLAGS_LIB = -std=c++14 -Wall -Wextra -O2
 LDFLAGS =
 
 SRC_DIR = src
@@ -23,13 +24,13 @@ INCLUDES = -I$(SRC_DIR) -I$(BRKGA_DIR)
 all: $(TARGET)
 
 $(TARGET): $(OBJS) $(BRKGA_OBJS)
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS)
+	$(CXX) $(CXXFLAGS_PROGRAM) $^ -o $@ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CXXFLAGS_PROGRAM) $(INCLUDES) -c $< -o $@
 
 $(OBJ_DIR)/brkga_%.o: $(BRKGA_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+	$(CXX) $(CXXFLAGS_LIB) $(INCLUDES) -c $< -o $@
 
 clean:
 	rm -rf $(OBJ_DIR)/* $(BIN_DIR)/*
@@ -42,6 +43,7 @@ tidy:
 	find $(SRC_DIR) -name "*.cpp" | xargs clang-tidy -p=. -checks=*,-fuchsia-*,-google-*,-llvm-header-guard,-llvm-include-order,-hicpp-*,-misc-unused-parameters,-modernize-use-trailing-return-type,-cppcoreguidelines-avoid-magic-numbers,-readability-magic-numbers,-readability-else-after-return
 
 check-syntax:
-	$(CXX) -fsyntax-only $(CXXFLAGS) $(INCLUDES) $(CHK_SOURCES)
+	$(CXX) -fsyntax-only $(CXXFLAGS_PROGRAM) $(INCLUDES) $(CHK_SOURCES)
 
 .PHONY: all clean format tidy check-syntax
+

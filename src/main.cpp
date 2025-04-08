@@ -1,4 +1,9 @@
+#include "ListGraph.hpp"
+#include "MatrixGraph.hpp"
+
+#include <fstream>
 #include <iostream>
+#include <set>
 
 #define DEBUG
 
@@ -23,9 +28,16 @@ struct AlgorithmParams {
 };
 
 AlgorithmParams parse_args( int argc, char * argv[] );
+void            load_and_normalize_graph( const std::string & filename, bool & graph_is_matrix, ListGraph & graph_l, MatrixGraph & graph_m );
 
-int main() {
-  std::cout << "Hello World!\n";
+int main( int argc, char * argv[] ) {
+  auto params = parse_args( argc, argv );
+
+  ListGraph   graph_l( 1 );
+  MatrixGraph graph_m( 1 );
+
+  bool graph_is_matrix = false;
+  load_and_normalize_graph( params.file_path, graph_is_matrix, graph_l, graph_m );
 
   return 0;
 }
@@ -72,4 +84,82 @@ AlgorithmParams parse_args( int argc, char * argv[] ) {
   }
 
   return params;
+}
+
+void load_and_normalize_graph( const std::string & filename, bool & graph_is_matrix, ListGraph & graph_l, MatrixGraph & graph_m ) {
+  std::ifstream file( filename );
+  if ( !file.is_open() ) {
+    throw std::runtime_error( "Não foi possível abrir o arquivo: " + filename );
+  }
+
+  std::set<int>                    vertices;
+  std::vector<std::pair<int, int>> edges;
+  std::string                      line;
+
+  while ( std::getline( file, line ) ) {
+    std::istringstream iss( line );
+    int                u, v;
+    if ( !( iss >> u >> v ) ) {
+      continue;
+    }
+    vertices.insert( u );
+    vertices.insert( v );
+    if ( u != v ) {
+      edges.emplace_back( u, v );
+    }
+  }
+
+  if ( vertices.empty() ) {
+    throw std::runtime_error( "Nenhum vértice encontrado na entrada" );
+  }
+
+  // Identificar lacunas nos IDs de vértices
+  std::vector<int> missing_vertices;
+  if ( !vertices.empty() ) {
+    int min_vertex = *vertices.begin();
+    int max_vertex = *vertices.rbegin();
+
+    for ( int i = min_vertex; i <= max_vertex; i++ ) {
+      if ( vertices.find( i ) == vertices.end() ) {
+        missing_vertices.push_back( i );
+      }
+    }
+  }
+
+  std::unordered_map<int, int> id_map;
+  int                          new_id = 0;
+  for ( int original_id : vertices ) {
+    id_map[original_id] = new_id++;
+  }
+
+  int                           num_vertices       = vertices.size();
+  double                        max_possible_edges = num_vertices * ( num_vertices - 1 ) / 2.0;
+  std::set<std::pair<int, int>> unique_edges;
+
+  for ( const auto & edge : edges ) {
+    int norm_u = id_map[edge.first];
+    int norm_v = id_map[edge.second];
+    if ( norm_u > norm_v ) {
+      std::swap( norm_u, norm_v );
+    }
+    unique_edges.insert( { norm_u, norm_v } );
+  }
+
+  double density = unique_edges.size() / max_possible_edges;
+
+  if ( density > 0.5 ) {
+    graph_is_matrix = true;
+    graph_m         = MatrixGraph( num_vertices );
+
+    for ( const auto & edge : unique_edges ) {
+      graph_m.add_edge( edge.first, edge.second );
+    }
+  } else {
+    graph_is_matrix = false;
+    graph_l         = ListGraph( num_vertices );
+
+    for ( const auto & edge : unique_edges ) {
+      graph_l.add_edge( edge.first, edge.second );
+    }
+  }
 }
