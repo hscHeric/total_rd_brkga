@@ -1,7 +1,6 @@
 #include "ListGraph.hpp"
 
 #include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 ListGraph::ListGraph( int n ) {

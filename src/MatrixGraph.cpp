@@ -1,7 +1,6 @@
 #include "MatrixGraph.hpp"
 
 #include <algorithm>
-#include <iostream>
 #include <stdexcept>
 
 MatrixGraph::MatrixGraph( int n ) {

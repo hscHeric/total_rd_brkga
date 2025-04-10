@@ -1,9 +1,12 @@
 #pragma once
 
 #include <boost/dynamic_bitset/dynamic_bitset.hpp>
+#include <functional>
+#include <iostream>
 #include <random>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 using BitSet = boost::dynamic_bitset<>;
 

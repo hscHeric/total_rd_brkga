@@ -1,7 +1,8 @@
 #pragma once
 
+#include <functional>
+#include <iostream>
 #include <random>
-#include <stdexcept>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
