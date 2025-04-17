@@ -4,8 +4,6 @@
 #include "ListGraph.hpp"
 #include "MatrixGraph.hpp"
 
-#define RANGE_CHECK
-
 #include <algorithm>
 #include <cfloat>
 #include <chrono>
@@ -15,7 +13,6 @@
 #include <set>
 #include <vector>
 
-#define IRACE
 #define DEBUG
 #define MIN_POP_SIZE 100
 
@@ -74,14 +71,22 @@ long unsigned generate_random_seed() {
 }
 
 int main( int argc, char * argv[] ) {
-  auto   params = parse_args( argc, argv );
-  double BEST   = DBL_MAX;
+  DEBUG_PRINT( "Iniciando execução do algoritmo BRKGA." );
+
+  auto params = parse_args( argc, argv );
+  DEBUG_PRINT( "Parâmetros lidos com sucesso." );
+  DEBUG_PRINT_VAR( params.file_path );
+
+  double BEST = DBL_MAX;
 
   ListGraph   graph_l( 1 );
   MatrixGraph graph_m( 1 );
+  bool        graph_is_matrix = false;
 
-  bool graph_is_matrix = false;
+  DEBUG_PRINT( "Carregando e normalizando o grafo..." );
   load_and_normalize_graph( params.file_path, graph_is_matrix, graph_l, graph_m );
+  DEBUG_PRINT( "Grafo carregado com sucesso." );
+  DEBUG_PRINT_VAR( graph_is_matrix );
 
 #if defined( IRACE )
   params.trials = 1;  // Force single trial in IRACE mode
@@ -89,6 +94,7 @@ int main( int argc, char * argv[] ) {
 
   // Determinar a semente RNG a ser usada
   long unsigned seed_to_use = params.random_seed ? generate_random_seed() : params.rng_seed;
+  DEBUG_PRINT_VAR( seed_to_use );
 
   MTRand rng( seed_to_use );
 
@@ -97,9 +103,13 @@ int main( int argc, char * argv[] ) {
 
   // Laço para os diferentes trials
   for ( unsigned trial = 0; trial < params.trials; ++trial ) {
+    DEBUG_PRINT( "Iniciando trial..." );
+    DEBUG_PRINT_VAR( trial + 1 );
+
     TrialResult result;
 
     if ( graph_is_matrix ) {
+      DEBUG_PRINT( "Usando representação com matriz de adjacência." );
       params.n = graph_m.order();
 
       unsigned population_size = std::max( static_cast<unsigned>( MIN_POP_SIZE ), static_cast<unsigned>( std::round( params.n / params.p ) ) );
@@ -225,6 +235,7 @@ int main( int argc, char * argv[] ) {
       result.is_dense       = ( graph_m.size() / ( graph_m.order() * ( graph_m.order() - 1 ) / 2.0 ) ) > 0.5;
 
     } else {
+      DEBUG_PRINT( "Usando representação com lista de adjacência." );
       params.n                 = graph_l.order();
       unsigned population_size = std::max( static_cast<unsigned>( MIN_POP_SIZE ), static_cast<unsigned>( std::round( params.n / params.p ) ) );
       unsigned pe_count        = static_cast<unsigned>( std::round( params.pe * population_size ) );
@@ -347,17 +358,24 @@ int main( int argc, char * argv[] ) {
       result.is_dense       = ( graph_l.size() / ( graph_l.order() * ( graph_l.order() - 1 ) / 2.0 ) ) > 0.5;
     }
 
-    // Armazenar o resultado do trial no vetor
+    DEBUG_PRINT( "Trial concluído." );
+    DEBUG_PRINT_VAR( result.fitness );
+    DEBUG_PRINT_VAR( result.elapsed_micros );
+
     all_results.push_back( result );
   }
 
 #if !defined( IRACE )
+  DEBUG_PRINT( "Escrevendo resultados no CSV..." );
   write_to_csv( params.output_file, all_results );
+  DEBUG_PRINT( "Arquivo salvo em: " + params.output_file );
 #endif  // !IRACE
 
 #if defined( IRACE )
   std::cout << BEST << std::endl;
 #endif
+
+  DEBUG_PRINT( "Execução finalizada." );
   return 0;
 }
 
