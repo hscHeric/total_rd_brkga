@@ -4,6 +4,9 @@
 #include "ListGraph.hpp"
 #include "MatrixGraph.hpp"
 
+#define RANGE_CHECK
+
+#include <algorithm>
 #include <cfloat>
 #include <chrono>
 #include <fstream>
@@ -12,7 +15,13 @@
 #include <set>
 #include <vector>
 
+#define IRACE
 #define DEBUG
+#define MIN_POP_SIZE 100
+
+#if defined( IRACE )
+  #undef DEBUG
+#endif
 
 #if defined( DEBUG )
   #define DEBUG_PRINT( msg )     std::cout << "DEBUG: " << msg << std::endl;
@@ -24,7 +33,7 @@
 
 struct AlgorithmParams {
   unsigned      n           = 0;      // Size of chromosomes
-  unsigned      p           = 1000;   // Size of population
+  double        p           = 5.0;    // Size of population
   double        pe          = 0.20;   // Fraction of population to be the elite-set
   double        pm          = 0.057;  // Fraction of population to be replaced by mutants
   double        rhoe        = 0.70;   // Probability offspring inherits elite parent allele
@@ -65,9 +74,8 @@ long unsigned generate_random_seed() {
 }
 
 int main( int argc, char * argv[] ) {
-  auto params = parse_args( argc, argv );
-
-  double BEST = DBL_MAX;
+  auto   params = parse_args( argc, argv );
+  double BEST   = DBL_MAX;
 
   ListGraph   graph_l( 1 );
   MatrixGraph graph_m( 1 );
@@ -75,9 +83,12 @@ int main( int argc, char * argv[] ) {
   bool graph_is_matrix = false;
   load_and_normalize_graph( params.file_path, graph_is_matrix, graph_l, graph_m );
 
+#if defined( IRACE )
+  params.trials = 1;  // Force single trial in IRACE mode
+#endif
+
   // Determinar a semente RNG a ser usada
   long unsigned seed_to_use = params.random_seed ? generate_random_seed() : params.rng_seed;
-  DEBUG_PRINT( "Usando semente RNG: " << seed_to_use );
 
   MTRand rng( seed_to_use );
 
@@ -91,10 +102,58 @@ int main( int argc, char * argv[] ) {
     if ( graph_is_matrix ) {
       params.n = graph_m.order();
 
-      TRDDecoder<MatrixGraph> decoder( graph_m );
-      DEBUG_PRINT( "Executando BRKGA com MatrixGraph" );
+      unsigned population_size = std::max( static_cast<unsigned>( MIN_POP_SIZE ), static_cast<unsigned>( std::round( params.n / params.p ) ) );
+      unsigned pe_count        = static_cast<unsigned>( std::round( params.pe * population_size ) );
+      unsigned pm_count        = static_cast<unsigned>( std::round( params.pm * population_size ) );
 
-      BRKGA<TRDDecoder<MatrixGraph>, MTRand> algorithm( params.n, params.p, params.pe, params.pm, params.rhoe, decoder, rng, params.K, params.MAXT );
+      if ( params.p <= 0.0 ) {
+        std::cerr << "Erro: --population deve ser > 0.\n";
+        exit( 1 );
+      }
+      if ( params.pe <= 0.0 || params.pe > 1.0 ) {
+        std::cerr << "Erro: --elite-set (pe) deve estar no intervalo (0.0, 1.0].\n";
+        exit( 1 );
+      }
+      if ( params.pm < 0.0 || params.pm > 1.0 ) {
+        std::cerr << "Erro: --mutants (pm) deve estar no intervalo [0.0, 1.0].\n";
+        exit( 1 );
+      }
+      if ( params.pe + params.pm > 1.0 ) {
+        std::cerr << "Erro: a soma de --elite-set e --mutants deve ser <= 1.0.\n";
+        exit( 1 );
+      }
+      if ( pe_count == 0 ) {
+        std::cerr << "Erro: elite-set resultou em 0 indivíduos. Ajuste --elite-set ou aumente a população.\n";
+        exit( 1 );
+      }
+      if ( pe_count > population_size ) {
+        std::cerr << "Erro: elite-set maior que a população.\n";
+        exit( 1 );
+      }
+      if ( pm_count > population_size ) {
+        std::cerr << "Erro: mutant-set maior que a população.\n";
+        exit( 1 );
+      }
+      if ( pe_count + pm_count > population_size ) {
+        std::cerr << "Erro: soma de elite-set e mutant-set maior que a população.\n";
+        exit( 1 );
+      }
+      if ( params.x_number > population_size ) {
+        std::cerr << "Erro: número de indivíduos a trocar (--exchange-number) maior que a população.\n";
+        exit( 1 );
+      }
+      if ( params.K < 1 ) {
+        std::cerr << "Erro: número de populações (--populations) deve ser >= 1.\n";
+        exit( 1 );
+      }
+      if ( params.MAXT < 1 ) {
+        std::cerr << "Erro: número de threads (--parallel) deve ser >= 1.\n";
+        exit( 1 );
+      }
+
+      TRDDecoder<MatrixGraph> decoder( graph_m );
+
+      BRKGA<TRDDecoder<MatrixGraph>, MTRand> algorithm( params.n, population_size, params.pe, params.pm, params.rhoe, decoder, rng, params.K, params.MAXT );
 
       unsigned generation       = 1;
       unsigned stagnation_count = 0;
@@ -108,26 +167,53 @@ int main( int argc, char * argv[] ) {
         if ( current_best < best_fitness ) {
           best_fitness     = current_best;
           stagnation_count = 0;
-          DEBUG_PRINT( "Nova melhor solução encontrada: " << best_fitness );
         } else {
           stagnation_count++;
           if ( stagnation_count >= params.stag_limit ) {
-            DEBUG_PRINT( "Critério de estagnação atingido após " << stagnation_count << " gerações sem melhoria" );
             break;
           }
         }
 
         if ( ( ++generation ) % params.x_intvl == 0 ) {
+          if ( params.x_number == 0 || params.x_number >= population_size ) {
+            std::cerr << "Erro: --exchange-number (x_number = " << params.x_number << ") deve estar no intervalo [1, " << ( population_size - 1 ) << "]."
+                      << std::endl;
+            std::cerr << "Valor atual de population_size: " << population_size << std::endl;
+            exit( 1 );
+          }
+
+          if ( params.x_number * ( params.K - 1 ) >= population_size ) {
+#if defined( IRACE )
+            std::cerr << "Aviso: Operação de troca excederia os limites da população!" << std::endl;
+            std::cerr << "Tamanho da população: " << population_size << std::endl;
+            std::cerr << "Total de cromossomos a receber: " << params.x_number * ( params.K - 1 ) << std::endl;
+#endif
+            // Calcula o número máximo seguro para troca
+            unsigned max_safe_x = population_size / ( params.K - 1 );
+            if ( max_safe_x == 0 )
+              max_safe_x = 1;
+
+            params.x_number = max_safe_x;
+
+#if defined( IRACE )
+            std::cerr << "Número de troca ajustado para: " << params.x_number << std::endl;
+#endif
+          }
+
+          if ( params.x_number == 0 || params.x_number >= population_size ) {
+            // Calculate a safe value that's approximately 10% of population size but at least 1
+            params.x_number = std::max( 1u, static_cast<unsigned>( population_size * 0.1 ) );
+
+            std::cerr << "Warning: --exchange-number adjusted to " << params.x_number << " (must be between 1 and " << ( population_size - 1 ) << ")"
+                      << std::endl;
+          }
+
           algorithm.exchangeElite( params.x_number );
-          DEBUG_PRINT( "Troca de elites realizada na geração " << generation );
         }
       } while ( generation < params.max_gens );
 
       auto end_time = std::chrono::high_resolution_clock::now();
       auto elapsed  = std::chrono::duration_cast<std::chrono::microseconds>( end_time - start_time );
-
-      DEBUG_PRINT( "Melhor solução encontrada tem valor objetivo = " << algorithm.getBestFitness() );
-      DEBUG_PRINT( "Número total de gerações executadas: " << generation );
 
       BEST = algorithm.getBestFitness();
 
@@ -139,16 +225,62 @@ int main( int argc, char * argv[] ) {
       result.is_dense       = ( graph_m.size() / ( graph_m.order() * ( graph_m.order() - 1 ) / 2.0 ) ) > 0.5;
 
     } else {
-      params.n = graph_l.order();
+      params.n                 = graph_l.order();
+      unsigned population_size = std::max( static_cast<unsigned>( MIN_POP_SIZE ), static_cast<unsigned>( std::round( params.n / params.p ) ) );
+      unsigned pe_count        = static_cast<unsigned>( std::round( params.pe * population_size ) );
+      unsigned pm_count        = static_cast<unsigned>( std::round( params.pm * population_size ) );
+
+      if ( params.p <= 0.0 ) {
+        std::cerr << "Erro: --population deve ser > 0.\n";
+        exit( 1 );
+      }
+      if ( params.pe <= 0.0 || params.pe > 1.0 ) {
+        std::cerr << "Erro: --elite-set (pe) deve estar no intervalo (0.0, 1.0].\n";
+        exit( 1 );
+      }
+      if ( params.pm < 0.0 || params.pm > 1.0 ) {
+        std::cerr << "Erro: --mutants (pm) deve estar no intervalo [0.0, 1.0].\n";
+        exit( 1 );
+      }
+      if ( params.pe + params.pm > 1.0 ) {
+        std::cerr << "Erro: a soma de --elite-set e --mutants deve ser <= 1.0.\n";
+        exit( 1 );
+      }
+      if ( pe_count == 0 ) {
+        std::cerr << "Erro: elite-set resultou em 0 indivíduos. Ajuste --elite-set ou aumente a população.\n";
+        exit( 1 );
+      }
+      if ( pe_count > population_size ) {
+        std::cerr << "Erro: elite-set maior que a população.\n";
+        exit( 1 );
+      }
+      if ( pm_count > population_size ) {
+        std::cerr << "Erro: mutant-set maior que a população.\n";
+        exit( 1 );
+      }
+      if ( pe_count + pm_count > population_size ) {
+        std::cerr << "Erro: soma de elite-set e mutant-set maior que a população.\n";
+        exit( 1 );
+      }
+      if ( params.x_number > population_size ) {
+        std::cerr << "Erro: número de indivíduos a trocar (--exchange-number) maior que a população.\n";
+        exit( 1 );
+      }
+      if ( params.K < 1 ) {
+        std::cerr << "Erro: número de populações (--populations) deve ser >= 1.\n";
+        exit( 1 );
+      }
+      if ( params.MAXT < 1 ) {
+        std::cerr << "Erro: número de threads (--parallel) deve ser >= 1.\n";
+        exit( 1 );
+      }
 
       TRDDecoder<ListGraph> decoder( graph_l );
-      DEBUG_PRINT( "Executando BRKGA com ListGraph" );
 
-      BRKGA<TRDDecoder<ListGraph>, MTRand> algorithm( params.n, params.p, params.pe, params.pm, params.rhoe, decoder, rng, params.K, params.MAXT );
-
-      unsigned generation       = 1;
-      unsigned stagnation_count = 0;
-      double   best_fitness     = std::numeric_limits<double>::infinity();
+      BRKGA<TRDDecoder<ListGraph>, MTRand> algorithm( params.n, population_size, params.pe, params.pm, params.rhoe, decoder, rng, params.K, params.MAXT );
+      unsigned                             generation       = 1;
+      unsigned                             stagnation_count = 0;
+      double                               best_fitness     = std::numeric_limits<double>::infinity();
 
       auto start_time = std::chrono::high_resolution_clock::now();
       do {
@@ -158,26 +290,52 @@ int main( int argc, char * argv[] ) {
         if ( current_best < best_fitness ) {
           best_fitness     = current_best;
           stagnation_count = 0;
-          DEBUG_PRINT( "Nova melhor solução encontrada: " << best_fitness );
         } else {
           stagnation_count++;
           if ( stagnation_count >= params.stag_limit ) {
-            DEBUG_PRINT( "Critério de estagnação atingido após " << stagnation_count << " gerações sem melhoria" );
             break;
           }
         }
 
+        if ( params.x_number * ( params.K - 1 ) >= population_size ) {
+#if !defined( IRACE )
+          std::cerr << "Aviso: Operação de troca excederia os limites da população!" << std::endl;
+          std::cerr << "Tamanho da população: " << population_size << std::endl;
+          std::cerr << "Total de cromossomos a receber: " << params.x_number * ( params.K - 1 ) << std::endl;
+#endif
+          // Calcula o número máximo seguro para troca
+          unsigned max_safe_x = population_size / ( params.K - 1 );
+          if ( max_safe_x == 0 )
+            max_safe_x = 1;
+
+          params.x_number = max_safe_x;
+#if !defined( IRACE )
+          std::cerr << "Número de troca ajustado para: " << params.x_number << std::endl;
+#endif
+        }
+
         if ( ( ++generation ) % params.x_intvl == 0 ) {
+          if ( params.x_number == 0 || params.x_number >= population_size ) {
+            std::cerr << "Erro: --exchange-number (x_number = " << params.x_number << ") deve estar no intervalo [1, " << ( population_size - 1 ) << "]."
+                      << std::endl;
+            std::cerr << "Valor atual de population_size: " << population_size << std::endl;
+            exit( 1 );
+          }
+
+          if ( params.x_number == 0 || params.x_number >= population_size ) {
+            // Calculate a safe value that's approximately 10% of population size but at least 1
+            params.x_number = std::max( 1u, static_cast<unsigned>( population_size * 0.1 ) );
+
+            std::cerr << "Warning: --exchange-number adjusted to " << params.x_number << " (must be between 1 and " << ( population_size - 1 ) << ")"
+                      << std::endl;
+          }
+
           algorithm.exchangeElite( params.x_number );
-          DEBUG_PRINT( "Troca de elites realizada na geração " << generation );
         }
       } while ( generation < params.max_gens );
 
       auto end_time = std::chrono::high_resolution_clock::now();
       auto elapsed  = std::chrono::duration_cast<std::chrono::microseconds>( end_time - start_time );
-
-      DEBUG_PRINT( "Melhor solução encontrada tem valor objetivo = " << algorithm.getBestFitness() );
-      DEBUG_PRINT( "Número total de gerações executadas: " << generation );
 
       BEST = algorithm.getBestFitness();
 
@@ -193,9 +351,13 @@ int main( int argc, char * argv[] ) {
     all_results.push_back( result );
   }
 
+#if !defined( IRACE )
   write_to_csv( params.output_file, all_results );
+#endif  // !IRACE
 
-  std::cout << "Melhor fitness encontrado: " << BEST << "\n";
+#if defined( IRACE )
+  std::cout << BEST << std::endl;
+#endif
   return 0;
 }
 
@@ -221,13 +383,17 @@ AlgorithmParams parse_args( int argc, char * argv[] ) {
     exit( 1 );
   }
 
+#if defined( IRACE )
+  params.file_path = argv[4];
+#else
   params.file_path = argv[1];
+#endif
 
   for ( int i = 2; i < argc; i++ ) {
     std::string arg = argv[i];
 
     if ( arg == "--population" && i + 1 < argc ) {
-      params.p = std::stoul( argv[++i] );
+      params.p = std::stod( argv[++i] );
     } else if ( arg == "--elite-set" && i + 1 < argc ) {
       params.pe = std::stod( argv[++i] );
     } else if ( arg == "--mutants" && i + 1 < argc ) {
@@ -254,6 +420,7 @@ AlgorithmParams parse_args( int argc, char * argv[] ) {
     } else if ( arg == "--trials" && i + 1 < argc ) {
       params.trials = std::stoul( argv[++i] );
     } else {
+#ifndef IRACE
       std::cerr << "Usage: " << argv[0] << " <input_file> [options]\n"
                 << "Options:\n"
                 << "  --population SIZE\n"
@@ -270,6 +437,7 @@ AlgorithmParams parse_args( int argc, char * argv[] ) {
                 << "  --output FILE\n"
                 << "  --trials NUMBER\n";
       exit( 1 );
+#endif  // !IRACE
     }
   }
 
@@ -294,7 +462,7 @@ void load_and_normalize_graph( const std::string & filename, bool & graph_is_mat
     }
     vertices.insert( u );
     vertices.insert( v );
-    if ( u != v ) {
+    if ( u != v ) {  // Ignorando arestas reflexivas
       edges.emplace_back( u, v );
     }
   }
@@ -303,28 +471,18 @@ void load_and_normalize_graph( const std::string & filename, bool & graph_is_mat
     throw std::runtime_error( "Nenhum vértice encontrado na entrada" );
   }
 
-  std::vector<int> missing_vertices;
-  if ( !vertices.empty() ) {
-    int min_vertex = *vertices.begin();
-    int max_vertex = *vertices.rbegin();
-
-    for ( int i = min_vertex; i <= max_vertex; i++ ) {
-      if ( vertices.find( i ) == vertices.end() ) {
-        missing_vertices.push_back( i );
-      }
-    }
-  }
-
+  // Criar mapeamento de IDs originais para novos IDs sequenciais
   std::unordered_map<int, int> id_map;
   int                          new_id = 0;
   for ( int original_id : vertices ) {
     id_map[original_id] = new_id++;
   }
 
-  int                           num_vertices       = vertices.size();
-  double                        max_possible_edges = num_vertices * ( num_vertices - 1 ) / 2.0;
-  std::set<std::pair<int, int>> unique_edges;
+  int    num_vertices       = vertices.size();
+  double max_possible_edges = num_vertices * ( num_vertices - 1 ) / 2.0;
 
+  // Normalizar arestas (remover duplicatas e tornar não-direcionadas)
+  std::set<std::pair<int, int>> unique_edges;
   for ( const auto & edge : edges ) {
     int norm_u = id_map[edge.first];
     int norm_v = id_map[edge.second];
@@ -338,14 +496,13 @@ void load_and_normalize_graph( const std::string & filename, bool & graph_is_mat
 
   if ( density > 0.5 ) {
     graph_is_matrix = true;
-
+    graph_m         = MatrixGraph( num_vertices );  // Inicializar o grafo de matriz
     for ( const auto & edge : unique_edges ) {
       graph_m.add_edge( edge.first, edge.second );
     }
   } else {
     graph_is_matrix = false;
     graph_l         = ListGraph( num_vertices );
-
     for ( const auto & edge : unique_edges ) {
       graph_l.add_edge( edge.first, edge.second );
     }
