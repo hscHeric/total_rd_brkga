@@ -1,0 +1,27 @@
+## Template for parameter description file for Iterated Race.
+
+# 1:name                2:switch                          3:type     4:values                       5:conditions
+#population              "--population "                   r          (1.0, 10.0)
+#elite_set               "--elite-set "                    r          (0.1, 0.5)
+#mutants                 "--mutants "                      r          (0.1, 0.5)                      | mutants + elite_set <= 1.0
+#inherit_elite_prob      "--inherit-elite-probability "    r          (0.1, 1.0)
+#populations             "--populations "                  i          (1, 50)
+#exchange_number         "--exchange-number "              i          (1, 5)
+#exchange_interval       "--exchange-interval "            i          (20, 500)
+#max_generations         "--max-generations "              i          (300, 2000)
+#stagnation_limit        "--stagnation-limit "             i          (100, 1000)
+
+# 1:name                2:switch                          3:type     4:values                       5:conditions
+population              "--population "                   r          (1.0, 10.0)
+elite_set               "--elite-set "                    r          (0.1, 0.5)
+mutants                 "--mutants "                      r          (0.1, 0.5)
+inherit_elite_prob      "--inherit-elite-probability "    r          (0.1, 1.0)
+populations             "--populations "                  i          (1, 50)
+exchange_interval       "--exchange-interval "            i          (20, 500)
+exchange_number         "--exchange-number "              i          (1, 5)
+max_generations         "--max-generations "              i          (500, 2000)
+stagnation_limit        "--stagnation-limit "             i          (100, 500)
+
+
+[global]
+digits = 4
