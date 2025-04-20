@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+rgg010,10,45,3,10766105,yes
+rgg010,10,45,3,10832184,yes
+rgg010,10,45,3,10850288,yes
+rgg010,10,45,3,10735642,yes
+rgg010,10,45,3,10871838,yes
+rgg010,10,45,3,10880033,yes
+rgg010,10,45,3,10706279,yes
+rgg010,10,45,3,10776021,yes
+rgg010,10,45,3,10754586,yes
+rgg010,10,45,3,10829060,yes

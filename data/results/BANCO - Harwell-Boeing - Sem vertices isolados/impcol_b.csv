@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+impcol_b,59,281,18,14543728,no
+impcol_b,59,281,18,15655918,no
+impcol_b,59,281,18,14952801,no
+impcol_b,59,281,18,13671991,no
+impcol_b,59,281,18,19144818,no
+impcol_b,59,281,18,19870139,no
+impcol_b,59,281,18,16141239,no
+impcol_b,59,281,18,20063093,no
+impcol_b,59,281,18,14326408,no
+impcol_b,59,281,18,18951299,no

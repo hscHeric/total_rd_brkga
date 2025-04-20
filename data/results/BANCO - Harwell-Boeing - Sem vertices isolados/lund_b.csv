@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+lund_b,147,1147,30,18333351,no
+lund_b,147,1147,30,17260630,no
+lund_b,147,1147,30,17850537,no
+lund_b,147,1147,30,17528725,no
+lund_b,147,1147,30,21647437,no
+lund_b,147,1147,30,17777431,no
+lund_b,147,1147,30,17282601,no
+lund_b,147,1147,30,18321194,no
+lund_b,147,1147,30,18554701,no
+lund_b,147,1147,30,16788727,no

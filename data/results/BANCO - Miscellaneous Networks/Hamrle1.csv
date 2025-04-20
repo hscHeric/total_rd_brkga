@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+Hamrle1,32,90,12,11817813,no
+Hamrle1,32,90,12,12243004,no
+Hamrle1,32,90,12,11996214,no
+Hamrle1,32,90,12,11753648,no
+Hamrle1,32,90,12,11885397,no
+Hamrle1,32,90,12,12070361,no
+Hamrle1,32,90,12,11939284,no
+Hamrle1,32,90,12,11938961,no
+Hamrle1,32,90,12,12004032,no
+Hamrle1,32,90,12,11949653,no

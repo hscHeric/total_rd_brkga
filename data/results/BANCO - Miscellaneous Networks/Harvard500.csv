@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+Harvard500,500,2043,61,88043410,no
+Harvard500,500,2043,61,78954341,no
+Harvard500,500,2043,61,81703034,no
+Harvard500,500,2043,61,90459110,no
+Harvard500,500,2043,61,88165930,no
+Harvard500,500,2043,61,91846618,no
+Harvard500,500,2043,61,90999973,no
+Harvard500,500,2043,61,89863286,no
+Harvard500,500,2043,61,89981018,no
+Harvard500,500,2043,61,94805573,no

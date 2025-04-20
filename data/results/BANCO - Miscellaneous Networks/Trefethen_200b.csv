@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+Trefethen_200b,199,1337,46,43099249,no
+Trefethen_200b,199,1337,46,58608520,no
+Trefethen_200b,199,1337,45,60210154,no
+Trefethen_200b,199,1337,47,46081568,no
+Trefethen_200b,199,1337,47,49509581,no
+Trefethen_200b,199,1337,47,52999773,no
+Trefethen_200b,199,1337,46,29526132,no
+Trefethen_200b,199,1337,46,36071204,no
+Trefethen_200b,199,1337,48,44209201,no
+Trefethen_200b,199,1337,48,46725698,no

@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+mcca,180,1680,93,16515421,no
+mcca,180,1680,93,16339197,no
+mcca,180,1680,93,16402082,no
+mcca,180,1680,93,16324072,no
+mcca,180,1680,93,16724252,no
+mcca,180,1680,93,16986192,no
+mcca,180,1680,93,16264700,no
+mcca,180,1680,93,16462430,no
+mcca,180,1680,93,16934660,no
+mcca,180,1680,93,16627870,no

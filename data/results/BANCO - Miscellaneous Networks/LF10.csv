@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+LF10,18,32,11,15842943,no
+LF10,18,32,11,15980098,no
+LF10,18,32,11,17287238,no
+LF10,18,32,11,13728343,no
+LF10,18,32,11,14928699,no
+LF10,18,32,11,17546541,no
+LF10,18,32,11,11400450,no
+LF10,18,32,11,11003048,no
+LF10,18,32,11,12535606,no
+LF10,18,32,11,13239807,no

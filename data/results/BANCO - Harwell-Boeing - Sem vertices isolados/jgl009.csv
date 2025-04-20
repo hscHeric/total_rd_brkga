@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+jgl009,9,32,3,10226660,yes
+jgl009,9,32,3,10166652,yes
+jgl009,9,32,3,10155539,yes
+jgl009,9,32,3,10142537,yes
+jgl009,9,32,3,10138512,yes
+jgl009,9,32,3,10125494,yes
+jgl009,9,32,3,10137182,yes
+jgl009,9,32,3,10145628,yes
+jgl009,9,32,3,10136441,yes
+jgl009,9,32,3,10138720,yes

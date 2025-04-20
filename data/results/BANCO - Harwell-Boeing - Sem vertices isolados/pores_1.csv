@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+pores_1,30,103,10,11483490,no
+pores_1,30,103,10,11628819,no
+pores_1,30,103,10,11481247,no
+pores_1,30,103,10,11391822,no
+pores_1,30,103,10,11508669,no
+pores_1,30,103,10,11560046,no
+pores_1,30,103,10,11503271,no
+pores_1,30,103,10,11640725,no
+pores_1,30,103,10,11594391,no
+pores_1,30,103,10,11467103,no

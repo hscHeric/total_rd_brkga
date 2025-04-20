@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+ibm32,32,90,14,11698777,no
+ibm32,32,90,14,11672833,no
+ibm32,32,90,14,11808465,no
+ibm32,32,90,14,11781495,no
+ibm32,32,90,14,11599668,no
+ibm32,32,90,14,11702641,no
+ibm32,32,90,14,11744393,no
+ibm32,32,90,14,11800040,no
+ibm32,32,90,14,11627825,no
+ibm32,32,90,14,11880639,no

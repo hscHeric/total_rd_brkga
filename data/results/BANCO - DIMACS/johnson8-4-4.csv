@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+johnson8-4-4,70,1855,4,13091570,yes
+johnson8-4-4,70,1855,4,13019860,yes
+johnson8-4-4,70,1855,4,13167957,yes
+johnson8-4-4,70,1855,4,13293278,yes
+johnson8-4-4,70,1855,4,13033080,yes
+johnson8-4-4,70,1855,4,13212176,yes
+johnson8-4-4,70,1855,4,13090781,yes
+johnson8-4-4,70,1855,4,13111805,yes
+johnson8-4-4,70,1855,4,13006413,yes
+johnson8-4-4,70,1855,4,13077226,yes

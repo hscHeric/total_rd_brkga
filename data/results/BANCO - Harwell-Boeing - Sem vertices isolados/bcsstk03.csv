@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+bcsstk03,112,264,56,14874460,no
+bcsstk03,112,264,56,15539147,no
+bcsstk03,112,264,56,15476921,no
+bcsstk03,112,264,56,14688278,no
+bcsstk03,112,264,56,15340226,no
+bcsstk03,112,264,56,15112412,no
+bcsstk03,112,264,56,15085259,no
+bcsstk03,112,264,56,14869045,no
+bcsstk03,112,264,56,15630198,no
+bcsstk03,112,264,56,15330289,no

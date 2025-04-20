@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+GD02_a,23,59,4,11108109,no
+GD02_a,23,59,4,11186042,no
+GD02_a,23,59,4,11372761,no
+GD02_a,23,59,4,11338986,no
+GD02_a,23,59,4,11377657,no
+GD02_a,23,59,4,11552737,no
+GD02_a,23,59,4,11487744,no
+GD02_a,23,59,4,11408468,no
+GD02_a,23,59,4,11428088,no
+GD02_a,23,59,4,11355702,no

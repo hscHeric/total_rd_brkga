@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+Tina_DisCal,11,32,4,10191049,yes
+Tina_DisCal,11,32,4,10379679,yes
+Tina_DisCal,11,32,4,11444489,yes
+Tina_DisCal,11,32,4,10287893,yes
+Tina_DisCal,11,32,4,10291690,yes
+Tina_DisCal,11,32,4,10609478,yes
+Tina_DisCal,11,32,4,10261250,yes
+Tina_DisCal,11,32,4,10347052,yes
+Tina_DisCal,11,32,4,10336238,yes
+Tina_DisCal,11,32,4,10290813,yes

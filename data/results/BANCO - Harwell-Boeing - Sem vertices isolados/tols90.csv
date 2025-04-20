@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+tols90,90,1449,3,14611872,no
+tols90,90,1449,3,19784832,no
+tols90,90,1449,3,20264898,no
+tols90,90,1449,3,17696128,no
+tols90,90,1449,3,18874171,no
+tols90,90,1449,3,23494480,no
+tols90,90,1449,3,28610531,no
+tols90,90,1449,3,27885213,no
+tols90,90,1449,3,17907944,no
+tols90,90,1449,3,13997638,no

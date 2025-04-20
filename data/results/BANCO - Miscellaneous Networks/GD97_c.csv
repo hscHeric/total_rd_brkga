@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+GD97_c,452,460,82,60429000,no
+GD97_c,452,460,82,59295724,no
+GD97_c,452,460,82,56775403,no
+GD97_c,452,460,82,58337016,no
+GD97_c,452,460,82,58414186,no
+GD97_c,452,460,82,60723212,no
+GD97_c,452,460,82,59172673,no
+GD97_c,452,460,82,59868524,no
+GD97_c,452,460,82,59463930,no
+GD97_c,452,460,82,60443257,no

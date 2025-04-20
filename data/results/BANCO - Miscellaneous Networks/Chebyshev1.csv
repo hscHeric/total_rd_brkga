@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+Chebyshev1,261,1542,3,25106576,no
+Chebyshev1,261,1542,3,26945139,no
+Chebyshev1,261,1542,3,26675078,no
+Chebyshev1,261,1542,3,27240996,no
+Chebyshev1,261,1542,3,27319824,no
+Chebyshev1,261,1542,3,26320243,no
+Chebyshev1,261,1542,3,25069710,no
+Chebyshev1,261,1542,3,25756911,no
+Chebyshev1,261,1542,3,25855591,no
+Chebyshev1,261,1542,3,24911018,no
