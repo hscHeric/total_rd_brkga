@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+cavity01,317,4237,18,24552168,no
+cavity01,317,4237,18,26847697,no
+cavity01,317,4237,18,36936383,no
+cavity01,317,4237,18,37269560,no
+cavity01,317,4237,18,28251007,no
+cavity01,317,4237,18,37899158,no
+cavity01,317,4237,18,25510875,no
+cavity01,317,4237,18,37986184,no
+cavity01,317,4237,18,36962407,no
+cavity01,317,4237,18,38326980,no

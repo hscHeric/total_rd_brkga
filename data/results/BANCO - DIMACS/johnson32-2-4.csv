@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+johnson32-2-4,496,107880,6,156559918,yes
+johnson32-2-4,496,107880,6,154929303,yes
+johnson32-2-4,496,107880,6,153858899,yes
+johnson32-2-4,496,107880,6,154613780,yes
+johnson32-2-4,496,107880,6,157723469,yes
+johnson32-2-4,496,107880,6,157835010,yes
+johnson32-2-4,496,107880,6,156454111,yes
+johnson32-2-4,496,107880,6,152471187,yes
+johnson32-2-4,496,107880,6,154590531,yes
+johnson32-2-4,496,107880,6,154274015,yes

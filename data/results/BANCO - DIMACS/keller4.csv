@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+keller4,171,9435,4,11891258,yes
+keller4,171,9435,4,13906829,yes
+keller4,171,9435,4,13320143,yes
+keller4,171,9435,4,12880332,yes
+keller4,171,9435,4,12183129,yes
+keller4,171,9435,4,12424950,yes
+keller4,171,9435,4,12943229,yes
+keller4,171,9435,4,13207394,yes
+keller4,171,9435,4,12573841,yes
+keller4,171,9435,4,11642156,yes

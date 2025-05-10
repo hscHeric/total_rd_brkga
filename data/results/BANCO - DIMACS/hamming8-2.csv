@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+hamming8-2,256,31616,4,34876384,yes
+hamming8-2,256,31616,4,35504435,yes
+hamming8-2,256,31616,4,34947278,yes
+hamming8-2,256,31616,4,35346706,yes
+hamming8-2,256,31616,4,35942505,yes
+hamming8-2,256,31616,4,35285827,yes
+hamming8-2,256,31616,4,35388259,yes
+hamming8-2,256,31616,4,35199141,yes
+hamming8-2,256,31616,4,37511470,yes
+hamming8-2,256,31616,4,35364082,yes

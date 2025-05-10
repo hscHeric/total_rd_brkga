@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+steam2,600,6580,75,77356046,no
+steam2,600,6580,76,92433178,no
+steam2,600,6580,76,77306409,no
+steam2,600,6580,77,70458687,no
+steam2,600,6580,77,74988911,no
+steam2,600,6580,77,68775503,no
+steam2,600,6580,74,87015840,no
+steam2,600,6580,78,68528800,no
+steam2,600,6580,77,101576656,no
+steam2,600,6580,77,88383075,no

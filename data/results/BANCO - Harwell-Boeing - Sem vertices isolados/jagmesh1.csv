@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+jagmesh1,936,2664,431,222458892,no
+jagmesh1,936,2664,429,270887984,no
+jagmesh1,936,2664,427,270606278,no
+jagmesh1,936,2664,431,270735078,no
+jagmesh1,936,2664,430,270425535,no
+jagmesh1,936,2664,427,270225378,no
+jagmesh1,936,2664,429,244792652,no
+jagmesh1,936,2664,435,205438251,no
+jagmesh1,936,2664,433,195872304,no
+jagmesh1,936,2664,432,270464293,no

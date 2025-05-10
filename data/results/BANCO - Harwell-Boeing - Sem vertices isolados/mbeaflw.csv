@@ -1,0 +1,11 @@
+graph_name,graph_order,graph_size,fitness_value,elapsed_time(microseconds),is_dense
+mbeaflw,487,41686,4,114014225,no
+mbeaflw,487,41686,4,115823966,no
+mbeaflw,487,41686,4,112280643,no
+mbeaflw,487,41686,4,102745836,no
+mbeaflw,487,41686,4,107520480,no
+mbeaflw,487,41686,4,111282374,no
+mbeaflw,487,41686,4,103441098,no
+mbeaflw,487,41686,4,100405015,no
+mbeaflw,487,41686,4,105282511,no
+mbeaflw,487,41686,4,105250498,no
